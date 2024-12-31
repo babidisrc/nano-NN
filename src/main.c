@@ -30,8 +30,7 @@ static void matmul(double* m1, double* m2, double* result, int rows, int cols) {
     }
 }
 
-static double feedforward(NeuralNetwork* n, double x[]) {
-    double h[HIDDEN_SIZE];
+static double feedforward(NeuralNetwork* n, double x[], double* h) {
 
     matmul(n->w1, x, h, HIDDEN_SIZE, INPUT_SIZE);
 
@@ -42,9 +41,10 @@ static double feedforward(NeuralNetwork* n, double x[]) {
 
     double o = 0;
     for (int i = 0; i < HIDDEN_SIZE; i++) {
-        o += n->w2[i] * h[i];
+        o += n->w2[i] * (h[i]);
     }
     o += n->b2[0];
+
     return sigmoid(o);
 }
 
@@ -68,19 +68,7 @@ static void train(NeuralNetwork* n, double data[][SAMPLES], int all_y_trues[], i
 
             // feedforward
             double h[HIDDEN_SIZE];
-            matmul(n->w1, data[i], h, HIDDEN_SIZE, INPUT_SIZE);
-
-            for (int j = 0; j < HIDDEN_SIZE; j++) {
-                h[j] += n->b1[j];
-                h[j] = sigmoid(h[j]);
-            }
-
-            double o = 0;
-            for (int j = 0; j < HIDDEN_SIZE; j++) {
-                o += n->w2[j] * h[j];
-            }
-            o += n->b2[0];
-            o = sigmoid(o);
+            double o = feedforward(n, data[i], h);
 
             double error = y_true - o;
 
@@ -105,7 +93,8 @@ static void train(NeuralNetwork* n, double data[][SAMPLES], int all_y_trues[], i
             double y_preds[SAMPLES];
             for (int i = 0; i < samples; i++) {
                 // calculate y_preds applying feedforward in each line
-                y_preds[i] = feedforward(n, data[i]);
+                double h[HIDDEN_SIZE];
+                y_preds[i] = feedforward(n, data[i], h);
             }
 
             double loss = MSELoss(all_y_trues, y_preds, samples);
@@ -155,8 +144,15 @@ int main(int argc, char* argv[]) {
 
     // expected output
     int all_y_trues[SAMPLES];
+    int aux = 0;
+
     for (int i = 0; i < SAMPLES; i++) {
         all_y_trues[i] = (int)data[i][INPUT_SIZE];
+        if(data[i][0] == 0 && data[i][1] == 0)
+        {
+            aux = i;
+            break;
+        }
     }
 
     NeuralNetwork n;
@@ -169,31 +165,29 @@ int main(int argc, char* argv[]) {
     initializeBiases(n.b2, OUTPUT_SIZE);
 
     // train neural network
-    train(&n, data, all_y_trues, SAMPLES, epochs);
+    train(&n, data, all_y_trues, aux, epochs);
 
     // evaluate predictions and output the results
     int correct = 0;
-    int i2 = 0;
 
     printf("\nPredictions:\n");
 
-    for (i2 = 0; i2 < SAMPLES; i2++) {
-        double prediction = feedforward(&n, data[i2]);
-
-        if(data[i2][0] == 0 && data[i2][1] == 0) break;
+    for (int i = 0; i < aux; i++) {
+        double h[HIDDEN_SIZE];
+        double prediction = feedforward(&n, data[i], h);
 
         printf("Input: {%.1f, %.1f} -> Prediction: %.3f (Expected: %d)\n", 
-                data[i2][0], data[i2][1], prediction, all_y_trues[i2]);
+                data[i][0], data[i][1], prediction, all_y_trues[i]);
 
         int rounded_prediction = prediction >= 0.5 ? 1 : 0;
 
-        if (rounded_prediction == all_y_trues[i2]) {
+        if (rounded_prediction == all_y_trues[i]) {
             correct++;
         }
     }
 
     // accuracy in %
-    double accuracy = (double)correct / (i2) * 100;
+    double accuracy = (double)correct / aux * 100;
     printf("\nFinal Precision: %.2f%%\n", accuracy);
 
     return 0;

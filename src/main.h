@@ -27,7 +27,7 @@ static void matmul(double* m1, double* m2, double* result, int rows, int cols);
 static double sigmoid(double x);
 static double sigmoidDeriv(double x);
 static double MSELoss(int y_true[], double y_pred[], int samples);
-static double feedforward(NeuralNetwork* n, double x[]);
+static double feedforward(NeuralNetwork* n, double x[], double* h);
 static void initializeWeights(double *matrix, int rows, int cols);
 static void initializeBiases(double *biases, int size);
 static void train(NeuralNetwork* n, double data[][SAMPLES], int all_y_trues[], int samples, int epochs);
