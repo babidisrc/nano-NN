@@ -24,8 +24,7 @@ static void matmul(double* m1, double* m2, double* result, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         result[i] = 0.0;
         for (int j = 0; j < cols; j++) {
-            int row_offset = i * cols;
-            result[i] += m1[row_offset + j] * m2[j];
+            result[i] += m1[i * cols + j] * m2[j];
         }
     }
 }
@@ -48,8 +47,8 @@ static double feedforward(NeuralNetwork* n, double x[], double* h) {
     return sigmoid(o);
 }
 
-static void initializeWeights(double* matrix, int rows, int cols) {
-    for (int i = 0; i < rows * cols; i++) {
+static void initializeWeights(double* matrix, int size) {
+    for (int i = 0; i < size; i++) {
         matrix[i] = ((double)rand() / RAND_MAX) * 2 - 1;
     }
 }
@@ -131,7 +130,7 @@ int main(int argc, char* argv[]) {
         while (token) {
             if (j > 0) {  
                 data[i][j - 1] = strtod(token, NULL); 
-                // printf("DATA[%d][%d]: %.2f\n", i, j - 1, data[i][j - 1]);
+                printf("DATA[%d][%d]: %.2f\n", i, j - 1, data[i][j - 1]);
             }
 
             token = strtok(NULL, ","); 
@@ -144,23 +143,18 @@ int main(int argc, char* argv[]) {
 
     // expected output
     int all_y_trues[SAMPLES];
-    int aux = 0;
+    int aux = i;
 
-    for (int i = 0; i < SAMPLES; i++) {
-        all_y_trues[i] = (int)data[i][INPUT_SIZE];
-        if(data[i][0] == 0 && data[i][1] == 0)
-        {
-            aux = i;
-            break;
-        }
+    for (int i = 0; i < aux; i++) {
+        all_y_trues[i] = (int)data[i][INPUT_SIZE]; 
     }
 
     NeuralNetwork n;
 
     // random values for weights and biases
     srand(time(NULL));
-    initializeWeights(n.w1, INPUT_SIZE, HIDDEN_SIZE);
-    initializeWeights(n.w2, HIDDEN_SIZE, OUTPUT_SIZE);
+    initializeWeights(n.w1, INPUT_SIZE * HIDDEN_SIZE); 
+    initializeWeights(n.w2, HIDDEN_SIZE * OUTPUT_SIZE);  
     initializeBiases(n.b1, HIDDEN_SIZE);
     initializeBiases(n.b2, OUTPUT_SIZE);
 
