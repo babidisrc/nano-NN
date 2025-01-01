@@ -6,10 +6,15 @@
 
 #define SIZE 2
 
+#define TRAIN_RATIO 0.8
+#define VAL_RATIO 0.1
+
+#define LAMBDA 0.001 
+
 #define INPUT_SIZE 2
 #define HIDDEN_SIZE 2
 #define OUTPUT_SIZE 1
-#define SAMPLES 100
+#define MAX_SAMPLES 100
 
 typedef struct {
     double weights[2];
@@ -30,4 +35,4 @@ static double MSELoss(int y_true[], double y_pred[], int samples);
 static double feedforward(NeuralNetwork* n, double x[], double* h);
 static void initializeWeights(double *matrix, int size);
 static void initializeBiases(double *biases, int size);
-static void train(NeuralNetwork* n, double data[][SAMPLES], int all_y_trues[], int samples, int epochs);
+static void train(NeuralNetwork* n, double train_data[][INPUT_SIZE], int train_labels[], double val_data[][INPUT_SIZE], int val_labels[], int train_size, int val_size, int epochs);

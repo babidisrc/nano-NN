@@ -29,21 +29,25 @@ make
 # Usage
 
 ```bash
-./nano-nn <file> epochs
+./nano-nn <dataset> epochs
 ```
 
-- `<file>`: Input file from any text extension (must have elements separated by commas).
-- `<epochs>`: Number of training epochs. Always an int (100, 1, 100, 250...)
+- `<dataset>`: Input file from any text extension (must have elements separated by commas).
+- `epochs`: Number of training epochs. Always an int (100, 1, 1000, 250...)
 
 ## Example:
 
 Given the file `test.csv`:
 
 ```bash
-Alice,-2,-1,1
-Mina,-1,-6,1
-Bob,25,6,0
-Charlie,17,4,0
+Sophie,1,0,1
+Leon,15,-1,0
+Julia,-7,-8,1
+Elias,20,0,0
+...
+Noah,13,2,0
+Layla,-4,-5,1
+Zachary,6,0,0
 ```
 
 Run the following command:
@@ -55,18 +59,19 @@ Run the following command:
 Output example:
 
 ```bash
-Epoch 10 Loss: 0.134
-Epoch 20 Loss: 0.098
+Epoch 0 - ValLoss: 0.2060
+Epoch 10 - ValLoss: 0.0383
+Epoch 20 - ValLoss: 0.0210
+Epoch 30 - ValLoss: 0.0160
 ...
-Input: {-2.0, -1.0} -> Prediction: 0.922 (Expected: 1)
-Input: {-1.0, -6.0} -> Prediction: 0.939 (Expected: 1)
-Input: {25.0, 6.0} -> Prediction: 0.012 (Expected: 0)
-Input: {17.0, 4.0} -> Prediction: 0.019 (Expected: 0)
+Input: {13.0, 2.0} -> Prediction: 0.072 (Expected: 0)
+Input: {-4.0, -5.0} -> Prediction: 0.933 (Expected: 1)
+Input: {6.0, 0.0} -> Prediction: 0.171 (Expected: 0)
 ```
 
 ## TODO
 - [X] Support for `.csv` files (WIP, only working with 4 columns for now)
-- [ ] Faster implementation
+- [X] More precise implementation
 - [ ] More helpful comments
 - [ ] Expand functionality (e.g., dynamic number of columns)
 - [ ] Maybe more...?
