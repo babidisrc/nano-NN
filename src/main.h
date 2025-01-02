@@ -1,3 +1,6 @@
+#ifndef __MAIN_H_
+#define __MAIN_H_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,9 +20,11 @@
 #define MAX_SAMPLES 100
 
 typedef struct {
-    double weights[2];
-    double bias;
-} Neuron;
+    int size;
+    int input_size;
+    int* labels;
+    double** data;
+} Dataset;
 
 typedef struct {
     double w1[INPUT_SIZE * HIDDEN_SIZE]; 
@@ -35,4 +40,6 @@ static double MSELoss(int y_true[], double y_pred[], int samples);
 static double feedforward(NeuralNetwork* n, double x[], double* h);
 static void initializeWeights(double *matrix, int size);
 static void initializeBiases(double *biases, int size);
-static void train(NeuralNetwork* n, double train_data[][INPUT_SIZE], int train_labels[], double val_data[][INPUT_SIZE], int val_labels[], int train_size, int val_size, int epochs);
+static void trainNetwork(NeuralNetwork* n, Dataset* train, Dataset* val, int epochs);
+
+#endif

@@ -58,19 +58,19 @@ static void initializeBiases(double* biases, int size) {
     }
 }
 
-static void train(NeuralNetwork* n, double train_data[][INPUT_SIZE], int train_labels[], double val_data[][INPUT_SIZE], int val_labels[], int train_size, int val_size, int epochs) {
+static void trainNetwork(NeuralNetwork* n, Dataset* train, Dataset* val, int epochs) {
     // regularization l2 + early stopping
     double prev_val_loss = 999999, no_improve_count = 0, max_no_improve = 6;
     double learn_rate = 0.1;
 
     for (int epoch = 0; epoch < epochs; epoch++) {
-        for (int i = 0; i < train_size; i++) {
+        for (int i = 0; i < train->size; i++) {
 
             // feedforward
             double h[HIDDEN_SIZE];
-            double o = feedforward(n, train_data[i], h);
+            double o = feedforward(n, train->data[i], h);
 
-            double error = train_labels[i] - o;
+            double error = train->labels[i] - o;
 
             // backpropagation + L2
             double d_o = error * sigmoidDeriv(o);
@@ -80,7 +80,7 @@ static void train(NeuralNetwork* n, double train_data[][INPUT_SIZE], int train_l
 
                 for (int k = 0; k < INPUT_SIZE; k++) {
                     double regularization_term = LAMBDA * n->w1[j * INPUT_SIZE + k];
-                    n->w1[j * INPUT_SIZE + k] += learn_rate * (d_h * train_data[i][k] - regularization_term);
+                    n->w1[j * INPUT_SIZE + k] += learn_rate * (d_h * train->data[i][k] - regularization_term);
                 }
 
                 n->b1[j] += learn_rate * d_h;
@@ -92,13 +92,13 @@ static void train(NeuralNetwork* n, double train_data[][INPUT_SIZE], int train_l
             n->b2[0] += learn_rate * d_o;
         }
 
-        double val_preds[val_size];
-        for(int i = 0; i < val_size; i++){
+        double val_preds[val->size];
+        for(int i = 0; i < val->size; i++){
             double h[HIDDEN_SIZE];
-            val_preds[i] = feedforward(n, val_data[i], h);
+            val_preds[i] = feedforward(n, val->data[i], h);
         }
 
-        double val_loss = MSELoss(val_labels, val_preds, val_size);
+        double val_loss = MSELoss(val->labels, val_preds, val->size);
 
         // Early stopping
         if (val_loss < prev_val_loss) {
@@ -114,6 +114,32 @@ static void train(NeuralNetwork* n, double train_data[][INPUT_SIZE], int train_l
             printf("Epoch %d - ValLoss: %.4f\n", epoch, val_loss);
         }
     }
+}
+
+// 
+Dataset* createDataset(int size, int input_size) {
+    Dataset* dataset = malloc(sizeof(Dataset));
+    dataset->size = size;
+    dataset->input_size = input_size;
+
+    // flexible array member
+    dataset->data = malloc(size * sizeof(double*));
+    for (int i = 0; i < size; i++) {
+        dataset->data[i] = malloc(input_size * sizeof(double));
+    }
+
+    dataset->labels = malloc(size * sizeof(int));
+
+    return dataset;
+}
+
+void freeDataset(Dataset* dataset) {
+    for (int i = 0; i < dataset->size; i++) {
+        free(dataset->data[i]);
+    }
+    free(dataset->data);
+    free(dataset->labels);
+    free(dataset);
 }
 
 int main(int argc, char* argv[]) {
@@ -156,20 +182,10 @@ int main(int argc, char* argv[]) {
     fclose(stream);
 
     int samples = i;
-    
-    // divide in train, test and validation
-    int train_size = (int)(samples * TRAIN_RATIO);
-    int val_size = (int)(samples * VAL_RATIO);
-    int test_size = samples - (train_size + val_size);
 
-    double train_data[train_size][INPUT_SIZE];
-    int train_labels[train_size];
-
-    double val_data[val_size][INPUT_SIZE];
-    int val_labels[val_size];
-
-    double test_data[test_size][INPUT_SIZE];
-    int test_labels[test_size];
+    Dataset* train = createDataset((int)(samples * TRAIN_RATIO), INPUT_SIZE);
+    Dataset* val = createDataset((int)(samples * VAL_RATIO), INPUT_SIZE);
+    Dataset* test = createDataset((int)(samples - (train->size + val->size)), INPUT_SIZE);
 
     // expected output
     int all_y_trues[samples];
@@ -178,28 +194,28 @@ int main(int argc, char* argv[]) {
         all_y_trues[i] = (int)data[i][INPUT_SIZE]; 
     }
 
-    for (int i = 0; i < train_size; i++) {
-        for (int j = 0; j < INPUT_SIZE; j++) {
-            train_data[i][j] = data[i][j];
+    for (int i = 0; i < train->size; i++) {
+        for (int j = 0; j < train->input_size; j++) {
+            train->data[i][j] = data[i][j];
         }
 
-        train_labels[i] = all_y_trues[i];
+        train->labels[i] = all_y_trues[i];
     }
     
-    for (int i = 0; i < val_size; i++) {
-        for (int j = 0; j < INPUT_SIZE; j++) {
-                val_data[i][j] = data[train_size + i][j];
+    for (int i = 0; i < val->size; i++) {
+        for (int j = 0; j < val->input_size; j++) {
+                val->data[i][j] = data[train->size + i][j];
         }
 
-        val_labels[i] = all_y_trues[train_size + i];
+        val->labels[i] = all_y_trues[train->size + i];
     }
 
-    for (int i = 0; i < test_size; i++) {
-        for (int j = 0; j < INPUT_SIZE; j++) {
-                test_data[i][j] = data[train_size + val_size + i][j];
+    for (int i = 0; i < test->size; i++) {
+        for (int j = 0; j < test->input_size; j++) {
+                test->data[i][j] = data[train->size + val->size + i][j];
         }
 
-        test_labels[i] = all_y_trues[train_size + val_size + i];
+        test->labels[i] = all_y_trues[train->size + val->size + i];
     }
 
     NeuralNetwork n;
@@ -212,30 +228,35 @@ int main(int argc, char* argv[]) {
     initializeBiases(n.b2, OUTPUT_SIZE);
 
     // train neural network
-    train(&n, train_data, train_labels, val_data, val_labels, train_size, val_size, epochs);
+    trainNetwork(&n, train, val, epochs);
 
     // evaluate predictions and output the results
     int correct = 0;
 
     printf("\nPredictions:\n");
 
-    for (int i = 0; i < val_size; i++) {
+    for (int i = 0; i < val->size; i++) {
         double h[HIDDEN_SIZE];
-        double prediction = feedforward(&n, test_data[i], h);
+        double prediction = feedforward(&n, test->data[i], h);
 
         printf("Input: {%.1f, %.1f} -> Prediction: %.3f (Expected: %d)\n", 
-                test_data[i][0], test_data[i][1], prediction, test_labels[i]);
-
+                test->data[i][0], test->data[i][1], prediction, test->labels[i]);
+        
         int rounded_prediction = prediction >= 0.5 ? 1 : 0;
 
-        if (rounded_prediction == test_labels[i]) {
+        if (rounded_prediction == test->labels[i]) {
             correct++;
         }
+
     }
 
-    // accuracy in %
-    double accuracy = (double)correct / test_size * 100;
-    printf("\nFinal Precision: %.2f%%\n", accuracy);
+    double accuracy = ((double)correct / (test->size - INPUT_SIZE)) * 100;;
+    printf("\nTest Precision: %.2f%%\n", accuracy);
+
+    // free all datasets
+    freeDataset(train);
+    freeDataset(val);
+    freeDataset(test);
 
     return 0;
 }
