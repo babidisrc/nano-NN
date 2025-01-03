@@ -29,17 +29,22 @@ make
 # Usage
 
 ```bash
-./nano-nn <dataset> epochs
+Usage: ./nano-nn <dataset> [input number (n)] [input column 1...n] epochs
 ```
 
 - `<dataset>`: Input file from any text extension (must have elements separated by commas).
+- `[input number (n)]`: Number of inputs. Always an int.
+- `[input column name 1..n]`: Columns name that will serve as an input.
 - `epochs`: Number of training epochs. Always an int (100, 1, 1000, 250...)
 
-## Example:
+Output/Label is always the last column for now.
+
+## Examples:
 
 Given the file `test.csv`:
 
 ```bash
+Name,Weight,Height,Gender
 Sophie,1,0,1
 Leon,15,-1,0
 Julia,-7,-8,1
@@ -53,7 +58,7 @@ Zachary,6,0,0
 Run the following command:
 
 ```bash
-./nano-nn test.csv 1000
+./nano-nn test.csv 2 Weight Height 1000
 ```
 
 Output example:
@@ -68,10 +73,3 @@ Input: {13.0, 2.0} -> Prediction: 0.072 (Expected: 0)
 Input: {-4.0, -5.0} -> Prediction: 0.933 (Expected: 1)
 Input: {6.0, 0.0} -> Prediction: 0.171 (Expected: 0)
 ```
-
-## TODO
-- [X] Support for `.csv` files (WIP, only working with 4 columns for now)
-- [X] More precise implementation
-- [ ] More helpful comments
-- [ ] Expand functionality (e.g., dynamic number of columns)
-- [ ] Maybe more...?
