@@ -7,6 +7,7 @@
     3: https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi
     4: https://www.youtube.com/watch?v=w8yWXqWQYmU&t=50s
     5: The Hundred-Page Machine Learning Book, by Andriy Burkov
+    6: https://www.geeksforgeeks.org/backpropagation-in-neural-network/
 
     ---------------------
 
@@ -37,7 +38,7 @@
     one simple activation function is the ReLU function
 
     the ReLU function has a cool feature: 
-    if the number is positive, it doesn't change; but if the number is negative, the number is now equal 0
+    if the number is positive, it doesn't change; but if the number is negative, the number is now equal to 0
 
     x = 5 ---> ReLU(5) = 5 [no change]
     x = -10 ---> ReLU(-10) = 0
