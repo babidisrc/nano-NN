@@ -1,7 +1,6 @@
 # nano-NN
 A Simple Neural Network in C that can identify digits using the MNIST Dataset.
 
-## About the MNIST Dataset
 The MNIST dataset is a collection of 70,000 handwritten digits (0-9), split into 60,000 training images and 10,000 test images. Each image is a 28x28 grayscale image, making it a popular dataset for benchmarking machine learning models.
 
 ## Prerequisites
