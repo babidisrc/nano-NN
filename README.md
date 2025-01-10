@@ -1,5 +1,8 @@
 # nano-NN
-A Simple Neural Network in C created for learning purposes, utilizing basic machine learning algorithms like backpropagation. It is not intended for production or development use.
+A Simple Neural Network in C that can identify digits using the MNIST Dataset.
+
+## About the MNIST Dataset
+The MNIST dataset is a collection of 70,000 handwritten digits (0-9), split into 60,000 training images and 10,000 test images. Each image is a 28x28 grayscale image, making it a popular dataset for benchmarking machine learning models.
 
 ## Prerequisites
 Before building nano-NN, ensure you have the following installed:
@@ -29,47 +32,46 @@ make
 # Usage
 
 ```bash
-Usage: ./nano-nn <dataset> [input number (n)] [input column 1...n] epochs
+Usage: ./nano-nn <imagefile>
 ```
 
-- `<dataset>`: Input file from any text extension (must have elements separated by commas).
-- `[input number (n)]`: Number of inputs. Always an int.
-- `[input column name 1..n]`: Columns name that will serve as an input.
-- `epochs`: Number of training epochs. Always an int (100, 1, 1000, 250...)
-
-Output/Label is always the last column for now.
+- `<imagefile>`: Image with 28x28 pixels or resizable.
 
 ## Examples:
+To test the neural network, you can use any 28x28 grayscale image of a handwritten digit. If your image is not 28x28, the program will resize it automatically.
 
-Given the file `test.csv`:
+**WARNING**
+1. **Image Quality:** Ensure the digit is clearly visible and centered in the image. Poor-quality images or digits that are too small may lead to incorrect predictions.
+2. **Aspect Ratio:** If the original image has a different aspect ratio (e.g., rectangular instead of square), the resizing process may distort the digit, making it harder for the neural network to recognize it.
+3. **Image Size:** While the program can handle larger images, extremely large images may lose important details during resizing, making the digit unrecognizable. For best results, use images that are close to 28x28 pixels or have a similar aspect ratio.
 
-```bash
-Name,Weight,Height,Gender
-Sophie,1,0,1
-Leon,15,-1,0
-Julia,-7,-8,1
-Elias,20,0,0
-...
-Noah,13,2,0
-Layla,-4,-5,1
-Zachary,6,0,0
-```
-
-Run the following command:
+Example command:
 
 ```bash
-./nano-nn test.csv 2 Weight Height 1000
+./nano-nn sample.jpg
 ```
 
 Output example:
 
 ```bash
-Epoch 0 - ValLoss: 0.2060
-Epoch 10 - ValLoss: 0.0383
-Epoch 20 - ValLoss: 0.0210
-Epoch 30 - ValLoss: 0.0160
 ...
-Input: {13.0, 2.0} -> Prediction: 0.072 (Expected: 0)
-Input: {-4.0, -5.0} -> Prediction: 0.933 (Expected: 1)
-Input: {6.0, 0.0} -> Prediction: 0.171 (Expected: 0)
+Epoch 15 - ValLoss: 0.1888, ValAccuracy: 94.54%
+Epoch 16 - ValLoss: 0.1886, ValAccuracy: 94.57%
+Epoch 17 - ValLoss: 0.1890, ValAccuracy: 94.64%
+Epoch 18 - ValLoss: 0.1891, ValAccuracy: 94.63%
+Epoch 19 - ValLoss: 0.1887, ValAccuracy: 94.60%
+Epoch 20 - ValLoss: 0.1897, ValAccuracy: 94.53%
+
+0 --> 0.999895%
+1 --> 0.000000%
+2 --> 0.000015%
+3 --> 0.000001%
+4 --> 0.000000%
+5 --> 0.000050%
+6 --> 0.000002%
+7 --> 0.000000%
+8 --> 0.000010%
+9 --> 0.000026%
+
+The digit is probably 0 with 99.99% confidence.
 ```
