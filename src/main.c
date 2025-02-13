@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
     // convert the output into probabilities
     double probs[OUTPUT_SIZE];
-    forwardPropagation(image, n, probs, h1, h2);
+    forwardPropagation(image, n, probs, h1, h2, 0);
 
     // show results
     printf("\n");

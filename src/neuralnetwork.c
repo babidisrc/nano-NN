@@ -178,7 +178,7 @@ void matmul(double **m1, double *m2, double *result, int rows, int cols) {
 
 // forward propagation: calculates the output of the neural network from the inputs
 // it transforms the inputs (x) into an output passing through weights, biases and activation functions
-void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double h1[], double h2[]) {
+void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double h1[], double h2[], int is_training) {
     int i, j;
 
     // hidden layer 1
@@ -189,12 +189,20 @@ void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double
         h1[i] = leakyRelu(h1[i]); // activation function
     }
 
+    if (is_training) {
+        applyDropout(h1, HIDDEN_SIZE_1, DROPOUT_RATE);
+    }
+    
     // hidden layer 2
     matmul(n->w2, h1, h2, HIDDEN_SIZE_2, HIDDEN_SIZE_1);
 
     for (i = 0; i < HIDDEN_SIZE_2; i++) {
         h2[i] += n->b2[i];
         h2[i] = leakyRelu(h2[i]); // activation function
+    }
+    
+    if (is_training) {
+        applyDropout(h2, HIDDEN_SIZE_2, DROPOUT_RATE);
     }
 
     // output layer
@@ -324,7 +332,7 @@ void trainModel(NeuralNetwork *n, Dataset *train, Dataset *val, int epochs) {
                     normalized_pixels[k] = PIXEL_SCALE(batch.pixels[j * INPUT_SIZE + k]);
                 }
 
-                forwardPropagation(normalized_pixels, n, probs, h1, h2);
+                forwardPropagation(normalized_pixels, n, probs, h1, h2, 1);
 
                 // one-hot encoding (e.g., label 2 becomes [0, 0, 1, 0, ..., 0])
                 double y_true[OUTPUT_SIZE] = {0};
@@ -394,7 +402,7 @@ void trainModel(NeuralNetwork *n, Dataset *train, Dataset *val, int epochs) {
                 normalized_pixels[k] = PIXEL_SCALE(val->pixels[i * INPUT_SIZE + k]);
             }
 
-            forwardPropagation(normalized_pixels, n, probs, h1, h2);
+            forwardPropagation(normalized_pixels, n, probs, h1, h2, 1);
 
             // convert label to one-hot encoding
             double y_true[OUTPUT_SIZE] = {0};
