@@ -62,6 +62,7 @@
     so, this is the basics of neural networks, and knowing that the code will become a little easier to read (i hope).
 */
 
+#include <errno.h>
 #include "core.h"
 
 // initialize neural networks
@@ -245,6 +246,49 @@ void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double
         activations[i] /= sum;
     }
     
+}
+
+/**
+ * @brief Applies the dropout technique to a set of neurons.
+ *
+ * This function applies dropout to a layer of neurons by randomly setting some 
+ * values to zero based on the specified dropout rate. The remaining neurons 
+ * are scaled to maintain the expected activation average.
+ *
+ * @param[in,out] layer         Pointer to the neuron array.
+ * @param[in]     size          Total number of neurons in the layer.
+ * @param[in]     dropout_rate  Dropout rate (value between 0.0 and 1.0).
+ *
+ * @return 0 on success, or a negative error code on failure:
+ *         - -EINVAL if the layer pointer is null or the size is invalid.
+ *
+ * @note Dropout is applied only during neural network training.
+ *       For inference, dropout should be disabled.
+ */
+int applyDropout(double *layer, unsigned int size, double dropout_rate) 
+{
+    int ret = 0u;
+    
+    unsigned int neuron_iterator = 0u;
+    double drop = 0u;
+
+    if (layer == NULL)
+    {
+        ret = -ENOMEM;
+        goto function_output;
+    }
+    
+    for (neuron_iterator = 0u; neuron_iterator < size; neuron_iterator++) 
+    {
+        drop = (double)rand() / RAND_MAX;
+        
+        layer[neuron_iterator] = (drop < dropout_rate) ? 0.0 : 
+                                (layer[neuron_iterator] / (1.0 - dropout_rate));
+
+    }
+
+function_output:
+    return ret;
 }
 
 // trains the neural network using the provided training and validation datasets.
