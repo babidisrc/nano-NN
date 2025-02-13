@@ -16,6 +16,8 @@
 #define HIDDEN_SIZE_1 16 // number of neurons in the first hidden layer
 #define HIDDEN_SIZE_2 16 // number of neurons in the second hidden layer
 
+#define DROPOUT_RATE 0.3
+
 typedef struct {
     // weights and biases of the first hidden layer
     double **w1;        // input layer weights for first hidden layer
@@ -36,7 +38,9 @@ double leakyReluDeriv(double x);
 void softmax(double x[], int size);
 void matmul(double **m1, double *m2, double *result, int rows, int cols);
 
-void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double h1[], double h2[]);
+int applyDropout(double *layer, unsigned int size, double dropout_rate);
+
+void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double h1[], double h2[], int flag);
 void trainModel(NeuralNetwork *n, Dataset *train, Dataset *val, int epochs);
 
 void initializeNeuralNetwork(NeuralNetwork *n);

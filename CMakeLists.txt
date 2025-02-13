@@ -17,7 +17,6 @@ set(HEADERS
     src/core.h
     src/stb_image_resize2.h
     src/stb_image.h
-    src/stb_image_write.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
