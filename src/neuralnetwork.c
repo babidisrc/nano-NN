@@ -166,8 +166,31 @@ double crossEntropy(double y_true[], double y_pred[], int classes) {
     return -result;
 }
 
-// matrix multiplication
-void matmul(double **m1, double *m2, double *result, int rows, int cols) {
+/**
+ * @brief Performs matrix-vector multiplication (linear transformation)
+ * 
+ * Multiplies a 2D matrix by a 1D vector to produce a 1D output vector.
+ * Each element of the result is the dot product of a matrix row with the input vector.
+ * 
+ * Mathematical operation: result = m1 × m2
+ * Where:
+ *   - m1 is a matrix of size [rows × cols]
+ *   - m2 is a vector of size [cols × 1] 
+ *   - result is a vector of size [rows × 1]
+ * 
+ * For each output element i:
+ *   result[i] = m1[i][0]*m2[0] + m1[i][1]*m2[1] + ... + m1[i][cols-1]*m2[cols-1]
+ * 
+ * @param[in]  m1     2D weight matrix (rows × cols)
+ * @param[in]  m2     1D input vector (length = cols)
+ * @param[out] result 1D output vector (length = rows) 
+ * @param[in]  rows   Number of rows in matrix m1 (number of output neurons)
+ * @param[in]  cols   Number of columns in matrix m1 (number of input features)
+ * 
+ * @note This is matrix-vector multiplication, not matrix-matrix multiplication
+ * @note Used in neural networks for forward propagation between layers
+ */
+void matvec(double **m1, double *m2, double *result, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         result[i] = 0;
         for (int j = 0; j < cols; j++) {
@@ -182,7 +205,7 @@ void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double
     int i, j;
 
     // hidden layer 1
-    matmul(n->w1, pixels, h1, HIDDEN_SIZE_1, INPUT_SIZE);
+    matvec(n->w1, pixels, h1, HIDDEN_SIZE_1, INPUT_SIZE);
 
     for (i = 0; i < HIDDEN_SIZE_1; i++) {
         h1[i] += n->b1[i];
@@ -194,7 +217,7 @@ void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double
     }
     
     // hidden layer 2
-    matmul(n->w2, h1, h2, HIDDEN_SIZE_2, HIDDEN_SIZE_1);
+    matvec(n->w2, h1, h2, HIDDEN_SIZE_2, HIDDEN_SIZE_1);
 
     for (i = 0; i < HIDDEN_SIZE_2; i++) {
         h2[i] += n->b2[i];
@@ -207,7 +230,7 @@ void forwardPropagation(double *pixels, NeuralNetwork *n, double probs[], double
 
     // output layer
     double output[OUTPUT_SIZE] = {0};
-    matmul(n->w3, h2, output, OUTPUT_SIZE, HIDDEN_SIZE_2);
+    matvec(n->w3, h2, output, OUTPUT_SIZE, HIDDEN_SIZE_2);
 
     for (i = 0; i < OUTPUT_SIZE; i++) {
         output[i] += n->b3[i];
